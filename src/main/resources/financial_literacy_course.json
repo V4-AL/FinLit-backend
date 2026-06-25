@@ -1,0 +1,248 @@
+{
+  "course": {
+    "id": "fin-lit-101",
+    "title": "Mastering Financial Literacy: Empowering Your Financial Future",
+    "description": "A short course covering the core foundations of personal finance: budgeting, saving, investing, and debt management.",
+    "estimated_duration_minutes": 90,
+    "modules": [
+      {
+        "id": "module-1",
+        "order": 1,
+        "title": "Introduction to Financial Literacy",
+        "lessons": [
+          {
+            "id": "lesson-1-1",
+            "order": 1,
+            "title": "What Is Financial Literacy?",
+            "content_blocks": [
+              {
+                "type": "text",
+                "value": "Financial literacy is the ability to understand and effectively use financial skills, including budgeting, saving, investing, and managing debt. It's the foundation for making confident money decisions."
+              },
+              {
+                "type": "image",
+                "value": "https://example.com/assets/fin-lit-intro.png",
+                "caption": "The five pillars of financial literacy"
+              },
+              {
+                "type": "key_points",
+                "value": [
+                  "Financial literacy reduces stress and increases confidence",
+                  "It's a skill that can be learned at any age",
+                  "Small consistent habits matter more than big one-time decisions"
+                ]
+              }
+            ],
+            "quiz": {
+              "id": "quiz-1-1",
+              "questions": [
+                {
+                  "id": "q1",
+                  "type": "multiple_choice",
+                  "question": "What is the main benefit of financial literacy?",
+                  "options": [
+                    "Getting rich quickly",
+                    "Making informed money decisions",
+                    "Avoiding all debt forever",
+                    "Only useful for high earners"
+                  ],
+                  "correct_answer": "Making informed money decisions"
+                }
+              ]
+            }
+          },
+          {
+            "id": "lesson-1-2",
+            "order": 2,
+            "title": "Assessing Your Current Financial Situation",
+            "content_blocks": [
+              {
+                "type": "text",
+                "value": "Before setting goals, you need a clear picture of where you stand. This means tracking your income, expenses, assets, and debts to calculate your net worth."
+              },
+              {
+                "type": "interactive_exercise",
+                "value": {
+                  "exercise_type": "net_worth_calculator",
+                  "instructions": "Enter your total assets and total liabilities to calculate your net worth.",
+                  "fields": ["total_assets", "total_liabilities"]
+                }
+              }
+            ],
+            "quiz": {
+              "id": "quiz-1-2",
+              "questions": [
+                {
+                  "id": "q1",
+                  "type": "multiple_choice",
+                  "question": "Net worth is calculated as:",
+                  "options": [
+                    "Income minus expenses",
+                    "Assets minus liabilities",
+                    "Savings plus investments",
+                    "Total debt only"
+                  ],
+                  "correct_answer": "Assets minus liabilities"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "module-2",
+        "order": 2,
+        "title": "Budgeting and Saving",
+        "lessons": [
+          {
+            "id": "lesson-2-1",
+            "order": 1,
+            "title": "Creating a Budget That Works",
+            "content_blocks": [
+              {
+                "type": "text",
+                "value": "A budget is a plan for how you'll spend your money each month. The 50/30/20 rule is a popular starting framework: 50% for needs, 30% for wants, and 20% for savings and debt repayment."
+              },
+              {
+                "type": "chart",
+                "value": {
+                  "chart_type": "pie",
+                  "data": [
+                    {"label": "Needs", "value": 50},
+                    {"label": "Wants", "value": 30},
+                    {"label": "Savings/Debt", "value": 20}
+                  ]
+                }
+              }
+            ],
+            "quiz": {
+              "id": "quiz-2-1",
+              "questions": [
+                {
+                  "id": "q1",
+                  "type": "multiple_choice",
+                  "question": "In the 50/30/20 rule, what percentage goes to savings and debt repayment?",
+                  "options": ["50%", "30%", "20%", "10%"],
+                  "correct_answer": "20%"
+                }
+              ]
+            }
+          },
+          {
+            "id": "lesson-2-2",
+            "order": 2,
+            "title": "Building an Emergency Fund",
+            "content_blocks": [
+              {
+                "type": "text",
+                "value": "An emergency fund is money set aside to cover unexpected expenses like medical bills or job loss. Most experts recommend saving 3 to 6 months' worth of living expenses."
+              },
+              {
+                "type": "key_points",
+                "value": [
+                  "Start small — even saving a fixed amount monthly adds up",
+                  "Keep emergency funds in an easily accessible account",
+                  "Replenish the fund after using it"
+                ]
+              }
+            ],
+            "quiz": {
+              "id": "quiz-2-2",
+              "questions": [
+                {
+                  "id": "q1",
+                  "type": "multiple_choice",
+                  "question": "How many months of expenses should an emergency fund typically cover?",
+                  "options": ["1 week", "1 month", "3-6 months", "2 years"],
+                  "correct_answer": "3-6 months"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "module-3",
+        "order": 3,
+        "title": "Investing and Managing Debt",
+        "lessons": [
+          {
+            "id": "lesson-3-1",
+            "order": 1,
+            "title": "Introduction to Investing",
+            "content_blocks": [
+              {
+                "type": "text",
+                "value": "Investing means putting your money into assets — like stocks, bonds, or real estate — with the goal of growing it over time. The key tradeoff is risk versus return: higher potential returns generally come with higher risk."
+              },
+              {
+                "type": "video",
+                "value": "https://example.com/assets/intro-to-investing.mp4",
+                "duration_seconds": 240
+              },
+              {
+                "type": "key_points",
+                "value": [
+                  "Compound interest grows your money exponentially over time",
+                  "Diversification helps spread out risk",
+                  "Start early — time matters more than the amount"
+                ]
+              }
+            ],
+            "quiz": {
+              "id": "quiz-3-1",
+              "questions": [
+                {
+                  "id": "q1",
+                  "type": "multiple_choice",
+                  "question": "Which of these reduces investment risk by spreading money across different assets?",
+                  "options": ["Compounding", "Diversification", "Budgeting", "Liquidity"],
+                  "correct_answer": "Diversification"
+                }
+              ]
+            }
+          },
+          {
+            "id": "lesson-3-2",
+            "order": 2,
+            "title": "Managing and Paying Off Debt",
+            "content_blocks": [
+              {
+                "type": "text",
+                "value": "Not all debt is equal. 'Good debt' (like a mortgage or student loan) can build long-term value, while 'bad debt' (like high-interest credit card debt) can quickly spiral. Two popular payoff strategies are the debt snowball (pay smallest balances first) and debt avalanche (pay highest interest rates first)."
+              },
+              {
+                "type": "comparison_table",
+                "value": {
+                  "headers": ["Strategy", "Method", "Best For"],
+                  "rows": [
+                    ["Snowball", "Pay smallest balance first", "Motivation and quick wins"],
+                    ["Avalanche", "Pay highest interest rate first", "Saving the most money overall"]
+                  ]
+                }
+              }
+            ],
+            "quiz": {
+              "id": "quiz-3-2",
+              "questions": [
+                {
+                  "id": "q1",
+                  "type": "multiple_choice",
+                  "question": "Which debt payoff method saves the most money in interest over time?",
+                  "options": ["Snowball", "Avalanche", "Both are equal", "Neither saves money"],
+                  "correct_answer": "Avalanche"
+                },
+                {
+                  "id": "q2",
+                  "type": "true_false",
+                  "question": "All debt is considered 'bad debt'.",
+                  "correct_answer": "False"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
