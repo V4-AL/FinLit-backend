@@ -30,7 +30,7 @@
 		<java.version>25</java.version>
 	</properties>
 
-	<!-- Add repositories to avoid cached central connectivity issues -->
+	<!-- Added repositories to avoid cached central connectivity issues -->
 	<repositories>
 		<repository>
 			<id>central</id>
@@ -57,6 +57,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.2.0</version>
 		</dependency>
 		
 		<dependency>
