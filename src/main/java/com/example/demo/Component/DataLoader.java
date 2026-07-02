@@ -2,9 +2,9 @@ package com.example.demo.Component;
 
 import org.springframework.stereotype.Component;
 import com.example.demo.model.Lesson;
-import com.example.demo.model.Module;
+import com.example.demo.model.CourseModule;
 import com.example.demo.repository.LessonRepository;
-import com.example.demo.repository.ModuleRepository;
+import com.example.demo.repository.CourseModuleRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -16,11 +16,11 @@ import java.util.List;
 public class DataLoader {
 
     private final LessonRepository lessonRepository;
-    private final ModuleRepository moduleRepository;
+    private final CourseModuleRepository courseModuleRepository;
 
-    public DataLoader(LessonRepository lessonRepository,ModuleRepository moduleRepository) {
+    public DataLoader(LessonRepository lessonRepository, CourseModuleRepository courseModuleRepository) {
         this.lessonRepository = lessonRepository;
-        this.moduleRepository = moduleRepository;
+        this.courseModuleRepository = courseModuleRepository;
     }
     
     @PostConstruct
@@ -39,17 +39,17 @@ public class DataLoader {
         JsonNode root = mapper.readTree(inputStream);
         
         List<Lesson> lessons = new ArrayList<>();
-        List<Module> modulesToSave = new ArrayList<>();
+        List<CourseModule> courseModulesToSave = new ArrayList<>();
         
         // Extract lessons from modules
         JsonNode modules = root.path("course").path("modules");
         modules.forEach(module -> {
-            Module moduleEntity = new Module();
-            moduleEntity.setModuleId(module.path("id").asText());
-            moduleEntity.setModuleOrder(module.path("order").asInt());
-            moduleEntity.setTitle(module.path("title").asText());
-            moduleEntity.setDescription(module.path("description").asText(""));
-            modulesToSave.add(moduleEntity);
+            CourseModule courseModule = new CourseModule();
+            courseModule.setModuleId(module.path("id").asText());
+            courseModule.setModuleOrder(module.path("order").asInt());
+            courseModule.setTitle(module.path("title").asText());
+            courseModule.setDescription(module.path("description").asText(""));
+            courseModulesToSave.add(courseModule);
 
             JsonNode lessonsList = module.path("lessons");
             lessonsList.forEach(lessonNode -> {
@@ -63,8 +63,8 @@ public class DataLoader {
         });
         
         // Save modules first, then lessons
-        moduleRepository.saveAll(modulesToSave);
+        courseModuleRepository.saveAll(courseModulesToSave);
         lessonRepository.saveAll(lessons);
-        System.out.println("Loaded " + modulesToSave.size() + " modules and " + lessons.size() + " lessons from JSON");
+        System.out.println("Loaded " + courseModulesToSave.size() + " course modules and " + lessons.size() + " lessons from JSON");
     }
 }
