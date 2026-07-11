@@ -26,7 +26,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints — no Firebase token needed
+                .requestMatchers("/").permitAll()
                 .requestMatchers("/api/learning-path/available-goals").permitAll()
                 .requestMatchers("/api/lessons").permitAll()
                 .requestMatchers("/api/lessons/**").permitAll()
@@ -34,11 +34,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/modules/**").permitAll()
                 .requestMatchers("/api/simulations/**").permitAll()
                 .requestMatchers("/api/subscription/webhook").permitAll()
-                // Everything else requires a valid Firebase token
                 .anyRequest().authenticated()
             )
             .addFilterBefore(firebaseTokenFilter,
                 UsernamePasswordAuthenticationFilter.class);
+            
 
         return http.build();
     }
