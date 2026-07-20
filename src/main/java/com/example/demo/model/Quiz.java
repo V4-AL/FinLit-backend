@@ -1,6 +1,5 @@
-package com.example.demo.dto;
+package com.example.demo.model;
 
-import com.example.demo.model.CourseModule;
 import jakarta.persistence.*;
 import java.util.List;
 

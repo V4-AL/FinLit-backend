@@ -1,6 +1,9 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.*;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.Question;
+import com.example.demo.model.Quiz;
+import com.example.demo.model.QuizResult;
 import com.example.demo.model.User;
 import com.example.demo.repository.*;
 import org.springframework.stereotype.Service;
@@ -15,15 +18,18 @@ public class QuizService {
     private final QuestionRepository questionRepository;
     private final QuizResultRepository quizResultRepository;
     private final UserRepository userRepository;
+    private final GamificationService gamificationService;
 
     public QuizService(QuizRepository quizRepository,
                        QuestionRepository questionRepository,
                        QuizResultRepository quizResultRepository,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       GamificationService gamificationService) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.quizResultRepository = quizResultRepository;
         this.userRepository = userRepository;
+        this.gamificationService = gamificationService;
     }
 
     public List<Quiz> getQuizzesByCourseModule(Long courseModuleId) {
@@ -46,9 +52,9 @@ public class QuizService {
         }
 
         Quiz quiz = quizRepository.findById(quizId)
-        .orElseThrow(() -> new RuntimeException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         QuizResult result = new QuizResult();
         result.setQuiz(quiz);
@@ -57,6 +63,11 @@ public class QuizService {
         result.setTotalQuestions(questions.size());
         result.setCompletedAt(LocalDateTime.now());
 
-        return quizResultRepository.save(result);
+        QuizResult saved = quizResultRepository.save(result);
+
+        // Points are awarded from the server-computed score, never a client-supplied count.
+        gamificationService.awardQuizPoints(userId, score);
+
+        return saved;
     }
 }

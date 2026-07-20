@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
 import com.example.demo.model.UserProgress;
+import com.example.demo.security.CurrentUserService;
 import com.example.demo.service.GamificationService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -11,30 +11,24 @@ import java.util.List;
 public class GamificationController {
 
     private final GamificationService gamificationService;
+    private final CurrentUserService currentUserService;
 
-    public GamificationController(GamificationService gamificationService) {
+    public GamificationController(GamificationService gamificationService,
+                                   CurrentUserService currentUserService) {
         this.gamificationService = gamificationService;
+        this.currentUserService = currentUserService;
     }
 
-    // Mark a lesson complete and award points
+    // Mark a lesson complete and award points for the authenticated user
     @PostMapping("/complete-lesson")
-    public UserProgress completeLesson(
-            @RequestParam Long userId,
-            @RequestParam Long lessonId) {
+    public UserProgress completeLesson(@RequestParam Long lessonId) {
+        Long userId = currentUserService.getCurrentUser().getId();
         return gamificationService.completeLesson(userId, lessonId);
-    }
-
-    // Award points after a quiz
-    @PostMapping("/award-quiz-points")
-    public void awardQuizPoints(
-            @RequestParam Long userId,
-            @RequestParam int correctAnswers) {
-        gamificationService.awardQuizPoints(userId, correctAnswers);
     }
 
     // Get top 10 leaderboard
     @GetMapping("/leaderboard")
-    public List<User> getLeaderboard() {
+    public List<GamificationService.LeaderboardEntry> getLeaderboard() {
         return gamificationService.getLeaderboard();
     }
 }

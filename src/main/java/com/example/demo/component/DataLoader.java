@@ -1,5 +1,7 @@
-package com.example.demo.Component;
+package com.example.demo.component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import com.example.demo.model.Lesson;
 import com.example.demo.model.CourseModule;
@@ -15,6 +17,8 @@ import java.util.List;
 @Component
 public class DataLoader {
 
+    private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
+
     private final LessonRepository lessonRepository;
     private final CourseModuleRepository courseModuleRepository;
 
@@ -22,14 +26,18 @@ public class DataLoader {
         this.lessonRepository = lessonRepository;
         this.courseModuleRepository = courseModuleRepository;
     }
-    
+
     @PostConstruct
     public void loadData() throws Exception {
-        // Check if lessons already exist
-        if (lessonRepository.count() > 0) {
-            return; // Skip if data already loaded
+        // Lessons and modules are seeded independently — a DB that already has lessons
+        // from a prior run but is missing modules (or vice versa) must still backfill
+        // whichever one is empty, rather than skipping the whole load.
+        boolean needsLessons = lessonRepository.count() == 0;
+        boolean needsModules = courseModuleRepository.count() == 0;
+        if (!needsLessons && !needsModules) {
+            return;
         }
-        
+
         // Read JSON file
         ObjectMapper mapper = new ObjectMapper();
         InputStream inputStream = getClass().getResourceAsStream("/financial_literacy_course.json");
@@ -37,10 +45,10 @@ public class DataLoader {
             throw new IllegalStateException("Resource not found: /financial_literacy_course.json");
         }
         JsonNode root = mapper.readTree(inputStream);
-        
+
         List<Lesson> lessons = new ArrayList<>();
         List<CourseModule> courseModulesToSave = new ArrayList<>();
-        
+
         // Extract lessons from modules
         JsonNode modules = root.path("course").path("modules");
         modules.forEach(module -> {
@@ -61,10 +69,14 @@ public class DataLoader {
                 lessons.add(lesson);
             });
         });
-        
-        // Save modules first, then lessons
-        courseModuleRepository.saveAll(courseModulesToSave);
-        lessonRepository.saveAll(lessons);
-        System.out.println("Loaded " + courseModulesToSave.size() + " course modules and " + lessons.size() + " lessons from JSON");
+
+        if (needsModules) {
+            courseModuleRepository.saveAll(courseModulesToSave);
+            log.info("Loaded {} course modules from JSON", courseModulesToSave.size());
+        }
+        if (needsLessons) {
+            lessonRepository.saveAll(lessons);
+            log.info("Loaded {} lessons from JSON", lessons.size());
+        }
     }
 }

@@ -1,7 +1,11 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -30,20 +34,27 @@ public class SubscriptionService {
     private final UserRepository userRepository;
     private final ModuleLifeRepository moduleLifeRepository;
     private final RestTemplate restTemplate;
+    private final PaystackSignatureVerifier paystackSignatureVerifier;
+    private final ObjectMapper objectMapper;
 
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
                                 UserRepository userRepository,
-                                ModuleLifeRepository moduleLifeRepository) {
+                                ModuleLifeRepository moduleLifeRepository,
+                                RestTemplate restTemplate,
+                                PaystackSignatureVerifier paystackSignatureVerifier,
+                                ObjectMapper objectMapper) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
         this.moduleLifeRepository = moduleLifeRepository;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplate;
+        this.paystackSignatureVerifier = paystackSignatureVerifier;
+        this.objectMapper = objectMapper;
     }
 
     // Initialize Paystack payment
     public Map<String, Object> initializePayment(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + paystackSecretKey);
@@ -67,8 +78,30 @@ public class SubscriptionService {
         return responseData;
     }
 
-    // Called by Paystack webhook after successful payment
-    public void handlePaymentSuccess(String reference) {
+    // Entry point for the webhook controller: verifies the signature, then dispatches the event.
+    @SuppressWarnings("unchecked")
+    public void handleWebhook(String rawBody, String signature) {
+        if (!paystackSignatureVerifier.isValid(rawBody, signature)) {
+            throw new UnauthorizedException("Invalid Paystack signature");
+        }
+
+        Map<String, Object> payload;
+        try {
+            payload = objectMapper.readValue(rawBody, Map.class);
+        } catch (Exception e) {
+            throw new BadRequestException("Malformed webhook payload");
+        }
+
+        String event = (String) payload.get("event");
+        if ("charge.success".equals(event)) {
+            Map<String, Object> data = (Map<String, Object>) payload.get("data");
+            String reference = (String) data.get("reference");
+            handlePaymentSuccess(reference);
+        }
+    }
+
+    // Called after signature verification, on a successful charge event
+    void handlePaymentSuccess(String reference) {
         // Verify transaction with Paystack
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + paystackSecretKey);
@@ -85,7 +118,7 @@ public class SubscriptionService {
         String status = (String) data.get("status");
 
         if (!"success".equals(status)) {
-            throw new RuntimeException("Payment verification failed");
+            throw new BadRequestException("Payment verification failed");
         }
 
         // Get userId from metadata
@@ -98,7 +131,7 @@ public class SubscriptionService {
                 .orElse(new Subscription());
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         subscription.setUser(user);
         subscription.setStatus(SubscriptionStatus.PREMIUM);
@@ -159,7 +192,7 @@ public class SubscriptionService {
     // Deduct a life when user attempts a module
     public Map<String, Object> useLife(Long userId, Long moduleId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         ModuleLife moduleLife = moduleLifeRepository
                 .findByUserIdAndModuleId(userId, moduleId)
@@ -172,7 +205,7 @@ public class SubscriptionService {
                 });
 
         if (moduleLife.getLivesRemaining() <= 0) {
-            throw new RuntimeException("No lives remaining for this module");
+            throw new BadRequestException("No lives remaining for this module");
         }
 
         moduleLife.setLivesRemaining(moduleLife.getLivesRemaining() - 1);
@@ -188,10 +221,10 @@ public class SubscriptionService {
     // Buy a life with points
     public Map<String, Object> buyLife(Long userId, Long moduleId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getAvailablePoints() < LIFE_COST) {
-            throw new RuntimeException("Not enough points. Need " + LIFE_COST +
+            throw new BadRequestException("Not enough points. Need " + LIFE_COST +
                     " points, you have " + user.getAvailablePoints());
         }
 
@@ -222,10 +255,10 @@ public class SubscriptionService {
     // Buy a quiz hint with points
     public Map<String, Object> buyHint(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getAvailablePoints() < HINT_COST) {
-            throw new RuntimeException("Not enough points. Need " + HINT_COST +
+            throw new BadRequestException("Not enough points. Need " + HINT_COST +
                     " points, you have " + user.getAvailablePoints());
         }
 

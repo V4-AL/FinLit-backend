@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.User;
 import com.example.demo.model.UserProgress;
 import com.example.demo.repository.UserRepository;
@@ -24,6 +25,8 @@ public class GamificationService {
         this.userProgressRepository = userProgressRepository;
     }
 
+    public record LeaderboardEntry(Long id, String username, int totalPoints, List<String> badges) {}
+
     public UserProgress completeLesson(Long userId, Long lessonId) {
         // Don't award points if already completed
         if (userProgressRepository.existsByUserIdAndLessonId(userId, lessonId)) {
@@ -31,11 +34,11 @@ public class GamificationService {
                     .stream()
                     .filter(p -> p.getLessonId().equals(lessonId))
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Progress not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Progress not found"));
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Award points
         user.setTotalPoints(user.getTotalPoints() + POINTS_PER_LESSON);
@@ -63,7 +66,7 @@ public class GamificationService {
 
     public void awardQuizPoints(Long userId, int correctAnswers) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         int pointsToAdd = correctAnswers * POINTS_PER_QUIZ_CORRECT;
         user.setTotalPoints(user.getTotalPoints() + pointsToAdd);
@@ -102,7 +105,10 @@ public class GamificationService {
         user.setBadges(badges);
     }
 
-    public List<User> getLeaderboard() {
-        return userRepository.findTop10ByOrderByTotalPointsDesc();
+    public List<LeaderboardEntry> getLeaderboard() {
+        return userRepository.findTop10ByOrderByTotalPointsDesc()
+                .stream()
+                .map(u -> new LeaderboardEntry(u.getId(), u.getUsername(), u.getTotalPoints(), u.getBadges()))
+                .toList();
     }
 }

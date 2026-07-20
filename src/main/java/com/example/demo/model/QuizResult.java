@@ -1,9 +1,7 @@
-package com.example.demo.dto;
+package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
-import com.example.demo.model.User;
 
 @Entity
 @Table(name = "quiz_result")

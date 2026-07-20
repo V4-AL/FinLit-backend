@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -7,15 +8,24 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 @Component
 public class FirebaseTokenFilter extends OncePerRequestFilter {
+
+    private final ObjectMapper objectMapper;
+
+    public FirebaseTokenFilter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -33,12 +43,13 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(
                                 decoded.getUid(),
                                 null,
-                                Collections.emptyList()
+                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
                         );
+                authentication.setDetails(decoded);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (FirebaseAuthException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Invalid or expired token");
+                JsonAuthenticationEntryPoint.writeError(response, HttpStatus.UNAUTHORIZED,
+                        "Invalid or expired token", request.getRequestURI(), objectMapper);
                 return;
             }
         }

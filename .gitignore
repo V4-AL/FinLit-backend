@@ -7,11 +7,12 @@ target/
 ### Local application config / secrets ###
 src/main/resources/application-local.properties
 src/main/resources/application-dev.properties
-src/main/resources/application-prod.properties
 .env
 *.env
 # Firebase service account
-src/main/resources/skills-lock.json
+src/main/resources/firebase-service-account.json
+# Local dev secrets file (do not commit real credentials here)
+/application.properties
 ### STS ###
 .apt_generated
 .classpath

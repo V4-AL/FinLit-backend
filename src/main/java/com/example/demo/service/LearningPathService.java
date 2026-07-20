@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.GoalType;
 import com.example.demo.model.User;
 import com.example.demo.repository.CourseModuleRepository;
@@ -47,7 +49,7 @@ public class LearningPathService {
 
     public User setUserGoals(Long userId, List<String> goals) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Validate each goal against the enum
         List<String> validatedGoals = new ArrayList<>();
@@ -56,7 +58,7 @@ public class LearningPathService {
                 GoalType.valueOf(goal.toUpperCase());
                 validatedGoals.add(goal.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid goal: " + goal +
+                throw new BadRequestException("Invalid goal: " + goal +
                     ". Valid goals are: " + Arrays.toString(GoalType.values()));
             }
         }
@@ -67,7 +69,7 @@ public class LearningPathService {
 
     public List<String> getLearningPath(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getGoals() == null || user.getGoals().isEmpty()) {
             // Return all modules if no goals set
@@ -89,7 +91,7 @@ public class LearningPathService {
 
     public Map<String, Object> getLearningPathWithDetails(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         List<String> moduleTitles = getLearningPath(userId);
 

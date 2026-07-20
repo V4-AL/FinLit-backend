@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Lesson;
 import com.example.demo.repository.LessonRepository;
 
@@ -25,6 +26,6 @@ public class LessonController {
     @GetMapping("/{id}")
     public Lesson getLessonById(@PathVariable @NonNull Long id) {
         return lessonRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lesson not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
     }
 }
